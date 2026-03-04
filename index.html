@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>সমবায় ফান্ড প্রো ২.০</title>
+    <meta name="description" content="সমবায় ফান্ড প্রো - পেশাদার সমবায় সমিতি আর্থিক ব্যবস্থাপনা অ্যাপ" />
+    <meta name="theme-color" content="#047857" />
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app-container">
+
+      <!-- ===== HEADER ===== -->
+      <header id="app-header">
+        <div class="header-top">
+          <div class="header-brand">
+            <div class="brand-icon"><i class="fas fa-seedling"></i></div>
+            <div>
+              <h1>সমবায় ফান্ড প্রো</h1>
+              <p class="header-subtitle" id="header-date"></p>
+            </div>
+          </div>
+          <button class="header-btn" onclick="switchTab('settings', document.querySelector('[data-tab=settings]'))" aria-label="Settings">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+
+        <!-- Global Month Filter -->
+        <div class="month-filter-bar">
+          <button class="month-nav-btn" onclick="changeMonth(-1)" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+          <div class="month-display" id="month-display" onclick="resetMonthFilter()">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="month-label">সর্বকালীন</span>
+          </div>
+          <button class="month-nav-btn" onclick="changeMonth(1)" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Balance Hero Card -->
+        <div class="balance-hero">
+          <div class="balance-hero-inner">
+            <p class="balance-label">নগদ তহবিল</p>
+            <h2 class="balance-amount" id="liquid-cash">৳০</h2>
+            <div class="balance-sub-row">
+              <div class="balance-sub-item">
+                <span class="sub-label">মূলধন</span>
+                <span class="sub-value" id="hero-equity">৳০</span>
+              </div>
+              <div class="balance-divider"></div>
+              <div class="balance-sub-item">
+                <span class="sub-label">চলমান ঋণ</span>
+                <span class="sub-value" id="hero-loans">৳০</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main id="main-content">
+
+        <!-- ===== DASHBOARD VIEW ===== -->
+        <div id="view-dashboard" class="view-section active">
+          <div class="stats-grid">
+            <div class="stat-card" onclick="switchTab('members', document.querySelector('[data-tab=members]'))">
+              <div class="stat-icon icon-blue"><i class="fas fa-users"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">মোট সদস্য</span>
+                <span class="stat-value" id="total-members">০</span>
+              </div>
+              <i class="fas fa-chevron-right stat-arrow"></i>
+            </div>
+            <div class="stat-card" onclick="switchTab('due', document.querySelector('[data-tab=due]'))">
+              <div class="stat-icon icon-red"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">বকেয়া সদস্য</span>
+                <span class="stat-value" id="due-members">০</span>
+              </div>
+              <i class="fas fa-chevron-right stat-arrow"></i>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon icon-green"><i class="fas fa-arrow-trend-up"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">মোট আয়</span>
+                <span class="stat-value" id="total-revenue">৳০</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon icon-orange"><i class="fas fa-receipt"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">মোট খরচ</span>
+                <span class="stat-value" id="total-expenses">৳০</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="section-title">দ্রুত কার্যক্রম</div>
+          <div class="quick-actions">
+            <button class="quick-btn" onclick="openModal('deposit')">
+              <div class="quick-icon qb-green"><i class="fas fa-hand-holding-dollar"></i></div>
+              <span>জমা</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('loan_given')">
+              <div class="quick-icon qb-orange"><i class="fas fa-paper-plane"></i></div>
+              <span>ঋণ দান</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('loan_repaid')">
+              <div class="quick-icon qb-blue"><i class="fas fa-rotate-left"></i></div>
+              <span>ঋণ ফেরত</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('expense')">
+              <div class="quick-icon qb-red"><i class="fas fa-money-bill-transfer"></i></div>
+              <span>খরচ</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('profit')">
+              <div class="quick-icon qb-purple"><i class="fas fa-chart-line"></i></div>
+              <span>আয়</span>
+            </button>
+            <button class="quick-btn" onclick="openModal('fine')">
+              <div class="quick-icon qb-amber"><i class="fas fa-gavel"></i></div>
+              <span>জরিমানা</span>
+            </button>
+          </div>
+
+          <!-- Recent Transactions Preview -->
+          <div class="section-title">
+            সাম্প্রতিক লেনদেন
+            <button class="see-all-btn" onclick="switchTab('transactions', document.querySelector('[data-tab=transactions]'))">সব দেখুন <i class="fas fa-arrow-right"></i></button>
+          </div>
+          <div id="recent-transactions">
+            <!-- JS renders -->
+          </div>
+
+          <!-- Financial Formula Box -->
+          <div class="section-title" style="margin-top: 20px;">হিসাব সূত্র</div>
+          <div class="info-box">
+            <div class="formula-row"><span class="formula-label">নগদ তহবিল</span> <span class="formula-eq">= (জমা + আয় + জরিমানা + ঋণ ফেরত) − (ঋণ + খরচ + ক্ষতি)</span></div>
+            <div class="formula-row"><span class="formula-label">মূলধন</span> <span class="formula-eq">= জমা + আয় + জরিমানা − খরচ − ক্ষতি</span></div>
+            <div class="formula-row"><span class="formula-label">মাথাপিছু লভ্যাংশ</span> <span class="formula-eq">= (আয় + জরিমানা − খরচ − ক্ষতি) ÷ সদস্য সংখ্যা</span></div>
+          </div>
+        </div>
+
+        <!-- ===== MEMBERS VIEW ===== -->
+        <div id="view-members" class="view-section">
+          <div class="section-title">
+            সদস্যদের পোর্টফোলিও
+            <span class="badge-pill badge-green" id="profit-per-member">লভ্যাংশ: ৳০</span>
+          </div>
+          <div class="member-search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="member-search" placeholder="সদস্য খুঁজুন..." oninput="filterMembers()" />
+          </div>
+          <div id="members-list">
+            <!-- JS renders -->
+          </div>
+        </div>
+
+        <!-- ===== MEMBER DETAIL VIEW ===== -->
+        <div id="view-member-detail" class="view-section">
+          <button class="back-btn" onclick="switchTab('members', document.querySelector('[data-tab=members]'))">
+            <i class="fas fa-arrow-left"></i> সদস্যদের তালিকা
+          </button>
+          <div id="member-detail-content">
+            <!-- JS renders -->
+          </div>
+        </div>
+
+        <!-- ===== TRANSACTIONS VIEW ===== -->
+        <div id="view-transactions" class="view-section">
+          <div class="section-title">লেনদেন রেকর্ড</div>
+          <div class="filter-chips" id="tx-filter-chips">
+            <button class="chip active" data-filter="all" onclick="filterTransactions('all', this)">সকল</button>
+            <button class="chip" data-filter="deposit" onclick="filterTransactions('deposit', this)">জমা</button>
+            <button class="chip" data-filter="loan_given" onclick="filterTransactions('loan_given', this)">ঋণ প্রদান</button>
+            <button class="chip" data-filter="loan_repaid" onclick="filterTransactions('loan_repaid', this)">ঋণ ফেরত</button>
+            <button class="chip" data-filter="profit" onclick="filterTransactions('profit', this)">আয়</button>
+            <button class="chip" data-filter="fine" onclick="filterTransactions('fine', this)">জরিমানা</button>
+            <button class="chip" data-filter="expense" onclick="filterTransactions('expense', this)">খরচ</button>
+            <button class="chip" data-filter="loss" onclick="filterTransactions('loss', this)">ক্ষতি</button>
+          </div>
+          <div id="transactions-list">
+            <!-- JS renders -->
+          </div>
+        </div>
+
+        <!-- ===== LOANS VIEW ===== -->
+        <div id="view-loans" class="view-section">
+          <div class="section-title">ঋণ ব্যবস্থাপনা</div>
+          <div class="loan-summary-cards">
+            <div class="loan-sum-card ls-given">
+              <i class="fas fa-paper-plane"></i>
+              <div>
+                <span class="ls-label">মোট প্রদত্ত ঋণ</span>
+                <span class="ls-value" id="loan-total-given">৳০</span>
+              </div>
+            </div>
+            <div class="loan-sum-card ls-repaid">
+              <i class="fas fa-rotate-left"></i>
+              <div>
+                <span class="ls-label">মোট ফেরত</span>
+                <span class="ls-value" id="loan-total-repaid">৳০</span>
+              </div>
+            </div>
+            <div class="loan-sum-card ls-outstanding">
+              <i class="fas fa-clock"></i>
+              <div>
+                <span class="ls-label">বকেয়া ঋণ</span>
+                <span class="ls-value" id="loan-outstanding">৳০</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-title" style="margin-top:20px;">ঋণের বিস্তারিত</div>
+          <div id="loans-detail-list">
+            <!-- JS renders -->
+          </div>
+        </div>
+
+        <!-- ===== DUE VIEW ===== -->
+        <div id="view-due" class="view-section">
+          <div class="section-title">বকেয়া তালিকা</div>
+          <div class="due-overview-card">
+            <div class="due-ov-item">
+              <span class="due-ov-label">মোট বকেয়া</span>
+              <span class="due-ov-value" id="total-due-amount">৳০</span>
+            </div>
+            <div class="due-ov-item">
+              <span class="due-ov-label">বকেয়া সদস্য</span>
+              <span class="due-ov-value" id="due-members-count">০ জন</span>
+            </div>
+          </div>
+          <div id="due-members-list">
+            <!-- JS renders -->
+          </div>
+        </div>
+
+        <!-- ===== SUMMARY VIEW ===== -->
+        <div id="view-summary" class="view-section">
+          <div class="section-title">আর্থিক সারসংক্ষেপ</div>
+
+          <!-- Overall Summary Card -->
+          <div class="summary-mega-card">
+            <div class="smc-header">
+              <i class="fas fa-chart-pie"></i>
+              <span>সামগ্রিক হিসাব</span>
+            </div>
+            <div class="smc-grid">
+              <div class="smc-item">
+                <span class="smc-label">মোট জমা</span>
+                <span class="smc-value smc-blue" id="sum-deposits">৳০</span>
+              </div>
+              <div class="smc-item">
+                <span class="smc-label">মোট আয়</span>
+                <span class="smc-value smc-green" id="sum-profit">৳০</span>
+              </div>
+              <div class="smc-item">
+                <span class="smc-label">মোট জরিমানা</span>
+                <span class="smc-value smc-amber" id="sum-fines">৳০</span>
+              </div>
+              <div class="smc-item">
+                <span class="smc-label">মোট খরচ</span>
+                <span class="smc-value smc-red" id="sum-expenses">৳০</span>
+              </div>
+              <div class="smc-item">
+                <span class="smc-label">নিট লাভ</span>
+                <span class="smc-value smc-green" id="sum-net-profit">৳০</span>
+              </div>
+              <div class="smc-item">
+                <span class="smc-label">মাথাপিছু লভ্যাংশ</span>
+                <span class="smc-value smc-blue" id="sum-per-head">৳০</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly Breakdown -->
+          <div class="section-title" style="margin-top:20px;">মাসিক বিবরণ</div>
+          <div id="monthly-summary-list">
+            <!-- JS renders -->
+          </div>
+        </div>
+
+        <!-- ===== SETTINGS VIEW ===== -->
+        <div id="view-settings" class="view-section">
+          <div class="section-title">সেটিংস</div>
+
+          <!-- Member Management -->
+          <div class="settings-group">
+            <div class="sg-header"><i class="fas fa-user-plus"></i> সদস্য ব্যবস্থাপনা</div>
+            <div class="sg-body">
+              <div class="form-group">
+                <label>নতুন সদস্যের নাম</label>
+                <input type="text" id="new-member-name" placeholder="যেমন: করিম (Karim)" />
+              </div>
+              <div class="form-group">
+                <label>ফোন নম্বর</label>
+                <input type="tel" id="new-member-phone" placeholder="01XXXXXXXXX" />
+              </div>
+              <div class="form-group">
+                <label>একাউন্ট নং</label>
+                <input type="text" id="new-member-account" placeholder="যেমন: FD0003" />
+              </div>
+              <div class="form-group">
+                <label>যোগদানের তারিখ</label>
+                <input type="date" id="new-member-date" />
+              </div>
+              <div class="form-group">
+                <label>প্রারম্ভিক জমা (৳)</label>
+                <input type="number" id="new-member-deposit" placeholder="০" value="0" min="0" />
+              </div>
+              <button class="btn-submit" onclick="addMember()"><i class="fas fa-plus"></i> সদস্য যুক্ত করুন</button>
+            </div>
+          </div>
+
+          <!-- Financial Settings -->
+          <div class="settings-group">
+            <div class="sg-header"><i class="fas fa-sliders"></i> আর্থিক সেটিংস</div>
+            <div class="sg-body">
+              <div class="form-group">
+                <label>মাসিক কিস্তি (৳)</label>
+                <input type="number" id="setting-monthly-installment" min="0" />
+              </div>
+              <div class="form-group">
+                <label>সমিতির নাম</label>
+                <input type="text" id="setting-fund-name" placeholder="সমবায় ফান্ড প্রো" />
+              </div>
+              <button class="btn-submit" onclick="saveSettings()"><i class="fas fa-save"></i> সেটিংস সেভ করুন</button>
+            </div>
+          </div>
+
+          <!-- Data Management -->
+          <div class="settings-group">
+            <div class="sg-header"><i class="fas fa-database"></i> ডেটা ব্যবস্থাপনা</div>
+            <div class="sg-body">
+              <button class="btn-action btn-export" onclick="exportData()"><i class="fas fa-download"></i> ডেটা এক্সপোর্ট (JSON)</button>
+              <label class="btn-action btn-import" for="import-file-input"><i class="fas fa-upload"></i> ডেটা ইম্পোর্ট</label>
+              <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(event)" />
+              <button class="btn-action btn-danger-action" onclick="confirmReset()"><i class="fas fa-trash-alt"></i> সকল ডেটা মুছুন</button>
+            </div>
+          </div>
+
+          <!-- Remove Member -->
+          <div class="settings-group">
+            <div class="sg-header"><i class="fas fa-user-minus"></i> সদস্য অপসারণ</div>
+            <div class="sg-body">
+              <div class="form-group">
+                <label>সদস্য নির্বাচন</label>
+                <select id="remove-member-select">
+                  <!-- JS populates -->
+                </select>
+              </div>
+              <button class="btn-action btn-danger-action" onclick="removeMember()"><i class="fas fa-user-minus"></i> সদস্য অপসারণ করুন</button>
+            </div>
+          </div>
+
+          <div class="app-version">
+            <p>সমবায় ফান্ড প্রো v2.0</p>
+            <p class="version-sub">সর্বশেষ আপডেট: মার্চ ২০২৬</p>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- ===== FLOATING ACTION BUTTON ===== -->
+      <button class="fab" id="fab-btn" onclick="openModal()" aria-label="Add Transaction">
+        <i class="fas fa-plus"></i>
+      </button>
+
+      <!-- ===== BOTTOM NAVIGATION ===== -->
+      <nav id="bottom-nav">
+        <div class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard', this)">
+          <i class="fas fa-th-large"></i>
+          <span>হোম</span>
+        </div>
+        <div class="nav-item" data-tab="members" onclick="switchTab('members', this)">
+          <i class="fas fa-user-group"></i>
+          <span>সদস্য</span>
+        </div>
+        <div class="nav-item" data-tab="transactions" onclick="switchTab('transactions', this)">
+          <i class="fas fa-list-ul"></i>
+          <span>লেনদেন</span>
+        </div>
+        <div class="nav-item" data-tab="loans" onclick="switchTab('loans', this)">
+          <i class="fas fa-handshake"></i>
+          <span>ঋণ</span>
+        </div>
+        <div class="nav-item" data-tab="summary" onclick="switchTab('summary', this)">
+          <i class="fas fa-chart-bar"></i>
+          <span>সারাংশ</span>
+        </div>
+      </nav>
+
+      <!-- ===== ADD TRANSACTION MODAL ===== -->
+      <div class="modal-overlay" id="tx-modal">
+        <div class="modal-content">
+          <div class="modal-handle"></div>
+          <div class="modal-header">
+            <h3 id="modal-title">নতুন লেনদেন যুক্ত করুন</h3>
+            <button class="modal-close" onclick="closeModal()" aria-label="Close"><i class="fas fa-times"></i></button>
+          </div>
+          <form id="tx-form">
+            <div class="form-group">
+              <label>রেকর্ডের ধরন</label>
+              <select id="tx-type" onchange="handleTypeChange()" required>
+                <option value="deposit">সদস্য জমা (Deposit)</option>
+                <option value="loan_given">ঋণ প্রদান (Loan Given)</option>
+                <option value="loan_repaid">ঋণ ফেরত (Loan Repaid)</option>
+                <option value="profit">লভ্যাংশ / আয় (Profit)</option>
+                <option value="fine">জরিমানা আদায় (Fine)</option>
+                <option value="expense">অফিস খরচ (Expense)</option>
+                <option value="loss">ক্ষতি (Loss)</option>
+              </select>
+            </div>
+            <div class="form-group" id="desc-group-select">
+              <label>সদস্য নির্বাচন করুন</label>
+              <select id="tx-desc-select">
+                <!-- JS populates -->
+              </select>
+            </div>
+            <div class="form-group" id="desc-group-text" style="display: none">
+              <label>বিবরণ / ব্যক্তির নাম</label>
+              <input type="text" id="tx-desc-text" placeholder="যেমন: চেক বই ক্রয় / তরমুজ" />
+            </div>
+            <div class="form-group">
+              <label>টাকার পরিমাণ (৳)</label>
+              <input type="number" id="tx-amount" placeholder="০" required min="1" />
+            </div>
+            <div class="form-group">
+              <label>তারিখ</label>
+              <input type="date" id="tx-date" />
+            </div>
+            <button type="submit" class="btn-submit"><i class="fas fa-check"></i> সেভ করুন</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== CONFIRM DIALOG ===== -->
+      <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content confirm-content">
+          <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <h3 id="confirm-title">নিশ্চিত করুন</h3>
+          <p id="confirm-message">আপনি কি নিশ্চিত?</p>
+          <div class="confirm-actions">
+            <button class="btn-cancel" onclick="closeConfirm()">বাতিল</button>
+            <button class="btn-confirm-yes" id="confirm-yes-btn">নিশ্চিত</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TOAST ===== -->
+      <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">সফলভাবে সম্পন্ন হয়েছে</span>
+      </div>
+
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
