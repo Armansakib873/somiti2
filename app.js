@@ -81,6 +81,9 @@ function loadData() {
     appState = JSON.parse(JSON.stringify(defaultData));
     saveData();
   }
+  
+  // Initialize Bengali date displays after app loads
+  initBengaliDateDisplays();
 }
 
 function saveData() {
@@ -94,6 +97,46 @@ function saveData() {
 const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
 function toBengaliNum(n) { 
   return String(n).replace(/\d/g, d => bengaliDigits[d]).replace(/\./g, "."); 
+}
+
+// Bengali date formatter - converts YYYY-MM-DD to "২ জানুয়ারি ২০২৫" format
+function formatBengaliDate(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return "";
+  const day = parseInt(parts[2], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const year = parseInt(parts[0], 10);
+  if (month < 0 || month > 11 || isNaN(day) || isNaN(year)) return "";
+  return `${toBengaliNum(day)} ${bengaliMonths[month]} ${toBengaliNum(year)}`;
+}
+
+// Initialize Bengali date displays for all date inputs
+function initBengaliDateDisplays() {
+  const dateInputs = [
+    { id: "setting-fund-start-date", displayId: "setting-fund-start-date-bn" },
+    { id: "new-member-date", displayId: "new-member-date-bn" },
+    { id: "tx-date", displayId: "tx-date-bn" },
+    { id: "qd-date", displayId: "qd-date-bn" },
+    { id: "edit-joining-date", displayId: "edit-joining-date-bn" }
+  ];
+  
+  dateInputs.forEach(item => {
+    const input = document.getElementById(item.id);
+    const display = document.getElementById(item.displayId);
+    if (input && display) {
+      // Set initial value
+      display.textContent = formatBengaliDate(input.value);
+      // Add event listener for changes
+      input.addEventListener("change", function() {
+        display.textContent = formatBengaliDate(this.value);
+      });
+      // Also update on input (for real-time typing)
+      input.addEventListener("input", function() {
+        display.textContent = formatBengaliDate(this.value);
+      });
+    }
+  });
 }
 
 function fmtCurrency(num) {
@@ -111,6 +154,68 @@ function fmtDate(dateStr) {
 function fmtShortDate(dateStr) {
   if (!dateStr) return "";
   try { return new Date(dateStr).toLocaleDateString("bn-BD", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return dateStr; }
+}
+
+// Number to Bengali words converter (correct Bengali numbering)
+function numberToBengaliWords(num) {
+  if (!num || num <= 0) return "";
+  num = Math.floor(num);
+
+  const numbers = [
+    "", "এক","দুই","তিন","চার","পাঁচ","ছয়","সাত","আট","নয়","দশ",
+    "এগারো","বারো","তেরো","চৌদ্দ","পনেরো","ষোল","সতেরো","আঠারো","উনিশ",
+    "বিশ","একুশ","বাইশ","তেইশ","চব্বিশ","পঁচিশ","ছাব্বিশ","সাতাশ","আঠাশ","উনত্রিশ",
+    "ত্রিশ","একত্রিশ","বত্রিশ","তেত্রিশ","চৌত্রিশ","পঁয়ত্রিশ","ছত্রিশ","সাঁইত্রিশ","আটত্রিশ","উনচল্লিশ",
+    "চল্লিশ","একচল্লিশ","বিয়াল্লিশ","তেতাল্লিশ","চুয়াল্লিশ","পঁয়তাল্লিশ","ছেচল্লিশ","সাতচল্লিশ","আটচল্লিশ","উনপঞ্চাশ",
+    "পঞ্চাশ","একান্ন","বাহান্ন","তিপ্পান্ন","চুয়ান্ন","পঞ্চান্ন","ছাপ্পান্ন","সাতান্ন","আটান্ন","উনষাট",
+    "ষাট","একষট্টি","বাষট্টি","তেষট্টি","চৌষট্টি","পঁয়ষট্টি","ছেষট্টি","সাতষট্টি","আটষট্টি","উনসত্তর",
+    "সত্তর","একাত্তর","বাহাত্তর","তিয়াত্তর","চুয়াত্তর","পঁচাত্তর","ছিয়াত্তর","সাতাত্তর","আটাত্তর","উনআশি",
+    "আশি","একাশি","বিরাশি","তিরাশি","চুরাশি","পঁচাশি","ছিয়াশি","সাতাশি","আটাশি","উননব্বই",
+    "নব্বই","একানব্বই","বিরানব্বই","তিরানব্বই","চুরানব্বই","পঁচানব্বই","ছিয়ানব্বই","সাতানব্বই","আটানব্বই","নিরানব্বই"
+  ];
+
+  const scales = [
+    { value: 10000000, name: "কোটি" },
+    { value: 100000, name: "লক্ষ" },
+    { value: 1000, name: "হাজার" },
+    { value: 100, name: "শত" }
+  ];
+
+  if (num < 100) return numbers[num];
+
+  let result = "";
+
+  for (let scale of scales) {
+    if (num >= scale.value) {
+      const count = Math.floor(num / scale.value);
+      num = num % scale.value;
+
+      if (scale.value === 100) {
+        result += numbers[count] + " " + scale.name + " ";
+      } else {
+        result += numberToBengaliWords(count) + " " + scale.name + " ";
+      }
+    }
+  }
+
+  if (num > 0) {
+    result += numbers[num] + " ";
+  }
+
+  return result.trim();
+}
+
+function showAmountInWords(val) {
+  const span = document.getElementById("amount-in-words");
+  if (!span) return;
+
+  const num = parseFloat(val);
+
+  if (!val || isNaN(num) || num <= 0) {
+    span.textContent = "";
+  } else {
+    span.textContent = numberToBengaliWords(num);
+  }
 }
 
 const bengaliMonths = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
@@ -2270,7 +2375,7 @@ function renderDepositSummaryTable() {
     grandTotalAdvance += advance;
 
     html += `<tr>`;
-    html += `<td class="sticky-col">${member.name.split(" ")[0].toUpperCase()}</td>`;
+    html += `<td class="sticky-col">${member.name}</td>`;
     html += `<td class="val-paid">${fmtCurrency(yearlyTotal)}</td>`;
     html += `<td class="${due > 0 ? 'val-due' : ''}">${due > 0 ? '-' + fmtCurrency(due) : '৳০'}</td>`;
     html += `<td class="val-adv">${advance > 0 ? fmtCurrency(advance) : '৳০'}</td>`;

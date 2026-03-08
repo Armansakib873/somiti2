@@ -349,6 +349,7 @@
               <div class="form-group">
   <label>সমিতি শুরুর তারিখ</label>
   <input type="date" id="setting-fund-start-date" />
+  <span id="setting-fund-start-date-bn" class="bengali-date-display"></span>
 </div>
 
 
@@ -408,6 +409,7 @@
               <div class="form-group">
                 <label><i class="fas fa-calendar-alt"></i> যোগদানের তারিখ</label>
                 <input type="date" id="new-member-date" />
+                <span id="new-member-date-bn" class="bengali-date-display"></span>
               </div>
               <div class="form-group">
                 <label><i class="fas fa-money-bill-wave"></i> প্রারম্ভিক জমা (৳)</label>
@@ -581,11 +583,13 @@
 <div class="form-group">
     <label>টাকার পরিমাণ (৳)</label>
     
-              <input type="number" id="tx-amount" placeholder="০" required min="1" />
+              <input type="number" id="tx-amount" placeholder="০" required min="1" oninput="showAmountInWords(this.value)" />
+              <span id="amount-in-words" style="display:block;font-size:0.85rem;color:var(--primary);margin-top:4px;min-height:1.2em;"></span>
             </div>
             <div class="form-group">
               <label>তারিখ</label>
               <input type="date" id="tx-date" />
+              <span id="tx-date-bn" class="bengali-date-display"></span>
             </div>
             <button type="submit" class="btn-submit"><i class="fas fa-check"></i> সেভ করুন</button>
           </form>
@@ -608,6 +612,7 @@
     <div class="form-group">
         <label>প্রকৃত জমার তারিখ (Actual Date)</label>
         <input type="date" id="qd-date" />
+        <span id="qd-date-bn" class="bengali-date-display"></span>
     </div>
     <div class="form-group">
         <label>জমার পরিমাণ (৳)</label>
@@ -678,6 +683,7 @@
             <div class="form-group">
               <label><i class="fas fa-calendar-plus" style="color:var(--accent);margin-right:4px;"></i> যোগদানের তারিখ</label>
               <input type="date" id="edit-joining-date" />
+              <span id="edit-joining-date-bn" class="bengali-date-display"></span>
               <div class="joining-date-warning" id="joining-date-warning">
                 <div class="jdw-text">
                   <i class="fas fa-exclamation-triangle"></i>
