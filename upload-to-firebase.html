@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload firebase.json to Firebase Realtime DB</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+    button { padding: 12px 24px; background: #047857; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #065f46; }
+    #status { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
+    .success { background: #d1fae5; color: #065f46; }
+    .error { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <h2>📤 Upload firebase.json to Firebase Realtime Database</h2>
+  <p>This page uploads the exported <code>firebase.json</code> data to your Firebase Realtime Database so all devices can see it.</p>
+  <p><strong>⚠️ Warning:</strong> This will overwrite any existing data in the database.</p>
+  <button onclick="uploadData()">Upload firebase.json to Firebase DB</button>
+  <div id="status"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEZvUtSTgRkrPDIRAmMUTNgVg85eNx7H8",
+      authDomain: "somiti-160cf.firebaseapp.com",
+      databaseURL: "https://somiti-160cf-default-rtdb.firebaseio.com",
+      projectId: "somiti-160cf",
+      storageBucket: "somiti-160cf.firebasestorage.app",
+      messagingSenderId: "957360419149",
+      appId: "1:957360419149:web:212084e98b083da26b4704"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.uploadData = async function() {
+      const statusEl = document.getElementById("status");
+      statusEl.style.display = "block";
+      statusEl.className = "";
+      statusEl.textContent = "⏳ Uploading...";
+
+      try {
+        const response = await fetch("firebase.json");
+        const data = await response.json();
+        await set(ref(db, "appData"), data);
+        statusEl.className = "success";
+        statusEl.textContent = "✅ Success! Data uploaded to Firebase. You can now close this page and open the main app.";
+      } catch (err) {
+        statusEl.className = "error";
+        statusEl.textContent = "❌ Error: " + err.message;
+        console.error(err);
+      }
+    };
+  </script>
+</body>
+</html>
