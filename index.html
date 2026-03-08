@@ -386,6 +386,8 @@
               <i class="fas fa-chevron-down"></i>
             </div>
             <div class="sg-body">
+              <!-- Dynamic Comment -->
+              <div id="new-member-dynamic-comment" class="dynamic-comment"></div>
               <div class="form-group">
                 <label><i class="fas fa-language"></i> বাংলা নাম</label>
                 <input type="text" id="new-member-name" placeholder="যেমন: করিম" />
@@ -527,6 +529,8 @@
             <button class="modal-close" onclick="closeModal()" aria-label="Close"><i class="fas fa-times"></i></button>
           </div>
           <form id="tx-form">
+            <!-- Dynamic Comment -->
+            <div id="tx-dynamic-comment" class="dynamic-comment"></div>
             <div class="form-group">
               <label>রেকর্ডের ধরন</label>
               <select id="tx-type" onchange="handleTypeChange()" required>
@@ -609,6 +613,8 @@
             <p id="qd-month-name" style="font-size: 0.85rem; color: var(--text-muted);"></p>
           </div>
           <form id="qd-form">
+    <!-- Dynamic Comment -->
+    <div id="qd-dynamic-comment" class="dynamic-comment"></div>
     <div class="form-group">
         <label>প্রকৃত জমার তারিখ (Actual Date)</label>
         <input type="date" id="qd-date" />
@@ -659,6 +665,8 @@
             <button class="modal-close" onclick="closeEditMember()" aria-label="Close"><i class="fas fa-times"></i></button>
           </div>
           <form id="edit-member-form" class="edit-member-form" autocomplete="off">
+            <!-- Dynamic Comment -->
+            <div id="edit-member-dynamic-comment" class="dynamic-comment"></div>
             <input type="hidden" id="edit-member-id" />
             <div class="form-group">
               <label><i class="fas fa-language" style="color:var(--primary);margin-right:4px;"></i> বাংলা নাম</label>

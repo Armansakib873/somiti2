@@ -84,6 +84,10 @@ function loadData() {
   
   // Initialize Bengali date displays after app loads
   initBengaliDateDisplays();
+  initTxDynamicComment();
+  initQdDynamicComment();
+  initNewMemberDynamicComment();
+  initEditMemberDynamicComment();
 }
 
 function saveData() {
@@ -1077,8 +1081,113 @@ function handleTypeChange() {
         const titles = { deposit: "সদস্য জমা প্রদান", loan_given: "ঋণ প্রদান রেকর্ড", loan_repaid: "ঋণ ফেরত রেকর্ড", profit: "আয় / লভ্যাংশ রেকর্ড", fine: "জরিমানা আদায়", expense: "খরচের হিসাব", loss: "ক্ষতির হিসাব" };
         modalTitle.textContent = titles[type] || "নতুন লেনদেন যুক্ত করুন";
     }
+    
+    updateTxDynamicComment();
 }
 // নতুন ফাংশন: চলমান ঋণগুলো খুঁজে বের করে ড্রপডাউনে বসানো
+
+// Dynamic comment updater for transaction modal
+function updateTxDynamicComment() {
+    const commentEl = document.getElementById("tx-dynamic-comment");
+    if (!commentEl) return;
+    
+    const type = document.getElementById("tx-type")?.value;
+    let comment = "";
+    
+    if (type === "deposit") {
+        // Get member name from select
+        const memberSelect = document.getElementById("tx-desc-select");
+        const memberName = memberSelect?.options[memberSelect?.selectedIndex]?.text || "";
+        
+        // Get target month/year
+        const targetMonth = document.getElementById("tx-target-month")?.value;
+        const targetYear = document.getElementById("tx-target-year")?.value;
+        const monthName = bengaliMonths[targetMonth] || "";
+        const yearStr = targetYear ? toBengaliNum(targetYear) : "";
+        
+        // Get amount
+        const amount = document.getElementById("tx-amount")?.value || "";
+        const amountBn = amount ? toBengaliNum(amount) : "";
+        
+        // Get date
+        const dateVal = document.getElementById("tx-date")?.value;
+        const dateBn = formatBengaliDate(dateVal);
+        
+        if (memberName && amount && monthName && yearStr) {
+            comment = `<i class="fas fa-info-circle"></i> ${memberName} ${monthName} ${yearStr} এর জন্য ${amountBn} টাকা জমা দিচ্ছেন।<br> জমার তারিখঃ ${dateBn}`;
+        } else if (memberName && amount) {
+            comment = `<i class="fas fa-info-circle"></i> ${memberName} ${amountBn} টাকা জমা দিচ্ছেন।`;
+        } else {
+            comment = `<i class="fas fa-edit"></i> সদস্য নির্বাচন করুন এবং তথ্য প্রদান করুন`;
+        }
+    } else if (type === "loan_given") {
+        const desc = document.getElementById("tx-desc-text")?.value || "";
+        const amount = document.getElementById("tx-amount")?.value || "";
+        const amountBn = amount ? toBengaliNum(amount) : "";
+        const dateVal = document.getElementById("tx-date")?.value;
+        const dateBn = formatBengaliDate(dateVal);
+        
+        if (desc && amount) {
+            comment = `<i class="fas fa-money-bill-wave"></i> ${desc} কে ${amountBn} টাকা ঋণ প্রদান করা হচ্ছে। তারিখঃ ${dateBn}`;
+        } else {
+            comment = `<i class="fas fa-edit"></i> ঋণ গ্রহীতার নাম এবং পরিমাণ লিখুন`;
+        }
+    } else if (type === "loan_repaid") {
+        const loanSelect = document.getElementById("tx-loan-select");
+        const loanDesc = loanSelect?.options[loanSelect?.selectedIndex]?.value || "";
+        const amount = document.getElementById("tx-amount")?.value || "";
+        const amountBn = amount ? toBengaliNum(amount) : "";
+        const dateVal = document.getElementById("tx-date")?.value;
+        const dateBn = formatBengaliDate(dateVal);
+        
+        if (loanDesc && amount) {
+            comment = `<i class="fas fa-hand-holding-usd"></i> ${loanDesc} এর কাছ থেকে ${amountBn} টাকা ঋণ ফেরত পাওয়া যাচ্ছে। তারিখঃ ${dateBn}`;
+        } else {
+            comment = `<i class="fas fa-edit"></i> ঋণ নির্বাচন করুন এবং পরিমাণ প্রদান করুন`;
+        }
+    } else if (type === "fine") {
+        const memberSelect = document.getElementById("tx-desc-select");
+        const memberName = memberSelect?.options[memberSelect?.selectedIndex]?.text || "";
+        const amount = document.getElementById("tx-amount")?.value || "";
+        const amountBn = amount ? toBengaliNum(amount) : "";
+        const dateVal = document.getElementById("tx-date")?.value;
+        const dateBn = formatBengaliDate(dateVal);
+        
+        if (memberName && amount) {
+            comment = `<i class="fas fa-gavel"></i> ${memberName} এর কাছ থেকে ${amountBn} টাকা জরিমানা আদায় করা হচ্ছে। তারিখঃ ${dateBn}`;
+        } else {
+            comment = `<i class="fas fa-edit"></i> সদস্য নির্বাচন করুন এবং জরিমানার পরিমাণ লিখুন`;
+        }
+    } else if (type === "profit" || type === "expense" || type === "loss") {
+        const desc = document.getElementById("tx-desc-text")?.value || "";
+        const amount = document.getElementById("tx-amount")?.value || "";
+        const amountBn = amount ? toBengaliNum(amount) : "";
+        const dateVal = document.getElementById("tx-date")?.value;
+        const dateBn = formatBengaliDate(dateVal);
+        const typeLabel = type === "profit" ? "আয়" : type === "expense" ? "খরচ" : "ক্ষতি";
+        
+        if (desc && amount) {
+            comment = `<i class="fas fa-calculator"></i> ${desc} এর জন্য ${amountBn} টাকা ${typeLabel} রেকর্ড করা হচ্ছে। তারিখঃ ${dateBn}`;
+        } else {
+            comment = `<i class="fas fa-edit"></i> বিবরণ এবং পরিমাণ প্রদান করুন`;
+        }
+    }
+    
+    commentEl.innerHTML = comment;
+}
+
+// Add event listeners for dynamic comment in transaction modal
+function initTxDynamicComment() {
+    const fields = ["tx-type", "tx-desc-select", "tx-desc-text", "tx-target-month", "tx-target-year", "tx-amount", "tx-date"];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", updateTxDynamicComment);
+            el.addEventListener("input", updateTxDynamicComment);
+        }
+    });
+}
+
 function populateActiveLoans() {
     const loanSelect = document.getElementById("tx-loan-select");
     if (!loanSelect) return;
@@ -2448,7 +2557,109 @@ function openQuickDeposit(memberId, monthIndex, existingAmount = 0) {
         clearBtn.style.display = "none";
     }
     
+    // Update Bengali date display and dynamic comment
+    const dateBn = document.getElementById("qd-date-bn");
+    if (dateBn) dateBn.textContent = formatBengaliDate(dateInput.value);
+    
+    // Initialize dynamic comment
+    updateQdDynamicComment();
+    
     document.getElementById("quick-deposit-modal").classList.add("active");
+}
+
+// Dynamic comment updater for quick deposit modal
+function updateQdDynamicComment() {
+    const commentEl = document.getElementById("qd-dynamic-comment");
+    if (!commentEl) return;
+    
+    const memberName = document.getElementById("qd-member-name")?.textContent || "";
+    const monthName = document.getElementById("qd-month-name")?.textContent || "";
+    const amount = document.getElementById("qd-amount")?.value || "";
+    const amountBn = amount ? toBengaliNum(amount) : "";
+    const dateVal = document.getElementById("qd-date")?.value;
+    const dateBn = formatBengaliDate(dateVal);
+    
+    if (memberName && amount) {
+commentEl.innerHTML = `<i class="fas fa-coins"></i> ${memberName} ${monthName} এর জন্য ${amountBn} টাকা জমা দিচ্ছেন।<br>জমার তারিখঃ ${dateBn}`;
+    } else {
+        commentEl.innerHTML = `<i class="fas fa-edit"></i> পরিমাণ প্রদান করুন`;
+    }
+}
+
+// Initialize quick deposit dynamic comment
+function initQdDynamicComment() {
+    const amountEl = document.getElementById("qd-amount");
+    const dateEl = document.getElementById("qd-date");
+    if (amountEl) {
+        amountEl.addEventListener("input", updateQdDynamicComment);
+        amountEl.addEventListener("change", updateQdDynamicComment);
+    }
+    if (dateEl) {
+        dateEl.addEventListener("input", updateQdDynamicComment);
+        dateEl.addEventListener("change", updateQdDynamicComment);
+    }
+}
+
+// Dynamic comment updater for new member form
+function updateNewMemberDynamicComment() {
+    const commentEl = document.getElementById("new-member-dynamic-comment");
+    if (!commentEl) return;
+    
+    const name = document.getElementById("new-member-name")?.value || "";
+    const phone = document.getElementById("new-member-phone")?.value || "";
+    const dateVal = document.getElementById("new-member-date")?.value;
+    const dateBn = formatBengaliDate(dateVal);
+    const deposit = document.getElementById("new-member-deposit")?.value || "";
+    const depositBn = deposit ? toBengaliNum(deposit) : "";
+    
+    if (name && deposit) {
+        commentEl.innerHTML = `<i class="fas fa-user-plus"></i> নতুন সদস্য ${name} যোগদান করছেন। ফোন: ${phone}। যোগদান তারিখ: ${dateBn}। প্রারম্ভিক জমা: ${depositBn} টাকা`;
+    } else if (name) {
+        commentEl.innerHTML = `<i class="fas fa-edit"></i> ${name} এর তথ্য প্রদান করুন`;
+    } else {
+        commentEl.innerHTML = `<i class="fas fa-edit"></i> সদস্যের নাম এবং তথ্য প্রদান করুন`;
+    }
+}
+
+// Initialize new member dynamic comment
+function initNewMemberDynamicComment() {
+    const fields = ["new-member-name", "new-member-phone", "new-member-date", "new-member-deposit"];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", updateNewMemberDynamicComment);
+            el.addEventListener("change", updateNewMemberDynamicComment);
+        }
+    });
+}
+
+// Dynamic comment updater for edit member form
+function updateEditMemberDynamicComment() {
+    const commentEl = document.getElementById("edit-member-dynamic-comment");
+    if (!commentEl) return;
+    
+    const name = document.getElementById("edit-bn-name")?.value || "";
+    const phone = document.getElementById("edit-phone")?.value || "";
+    const dateVal = document.getElementById("edit-joining-date")?.value;
+    const dateBn = formatBengaliDate(dateVal);
+    
+    if (name) {
+        commentEl.innerHTML = `<i class="fas fa-user-edit"></i> ${name} এর তথ্য সম্পাদনা করছেন। ফোন: ${phone}। যোগদান তারিখ: ${dateBn}`;
+    } else {
+        commentEl.innerHTML = `<i class="fas fa-edit"></i> সদস্যের তথ্য সম্পাদনা করুন`;
+    }
+}
+
+// Initialize edit member dynamic comment
+function initEditMemberDynamicComment() {
+    const fields = ["edit-bn-name", "edit-phone", "edit-email", "edit-joining-date"];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", updateEditMemberDynamicComment);
+            el.addEventListener("change", updateEditMemberDynamicComment);
+        }
+    });
 }
 
 function closeQuickDeposit() {
@@ -2553,6 +2764,11 @@ function openEditMember(memberId) {
     editMemberOriginalDate = member.openingDate || "";
     document.getElementById("joining-date-warning").style.display = "none";
     document.getElementById("clear-past-dues").checked = false;
+    
+    // Update Bengali date display and dynamic comment
+    const dateBn = document.getElementById("edit-joining-date-bn");
+    if (dateBn) dateBn.textContent = formatBengaliDate(member.openingDate);
+    updateEditMemberDynamicComment();
     
     document.getElementById("edit-member-modal").classList.add("active");
 }
