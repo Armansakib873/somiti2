@@ -3108,10 +3108,14 @@ function openDueSummary(memberId) {
         let boosterInfo = "";
         let boosterFullyPaid = false;
         if (monthsFoundInYear > 0 && annualBooster > 0) {
-            const boosterPaidTotal = deposits.filter(d => {
-                const target = getDepositTarget(d);
-                return target.year === year && (d.desc && d.desc.toLowerCase().includes("boost"));
-            }).reduce((sum, d) => sum + d.amount, 0);
+            let yearlyTotal = 0;
+            let totalRegularPaid = 0;
+            for (let mo = 0; mo < 12; mo++) {
+                const p = slots[`${year}-${mo}`] || 0;
+                yearlyTotal += p;
+                totalRegularPaid += Math.min(p, monthlyInstallment);
+            }
+            const boosterPaidTotal = yearlyTotal - totalRegularPaid;
 
             if (boosterPaidTotal >= annualBooster) {
                 boosterFullyPaid = true;
