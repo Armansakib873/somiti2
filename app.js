@@ -3668,3 +3668,46 @@ function initGlobalFilterSwipe() {
     }
   }, { passive: true });
 }
+
+// =========================================
+// PWA INSTALLATION LOGIC
+// =========================================
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+  
+  // Show the custom install button in the settings tab
+  const installContainer = document.getElementById('pwa-install-container');
+  if (installContainer) {
+    installContainer.style.display = 'block';
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const installBtn = document.getElementById('pwa-install-btn');
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                showToast("এই ডিভাইস/ব্রাউজার অটো-ইনস্টল সাপোর্ট করে না। Share থেকে 'Add to Home Screen' চাপুন।", true);
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            
+            if (outcome === 'accepted') {
+                const installContainer = document.getElementById('pwa-install-container');
+                if (installContainer) installContainer.style.display = 'none';
+            }
+            // We've used the prompt, and can't use it again, drop it
+            deferredPrompt = null;
+        });
+    }
+});

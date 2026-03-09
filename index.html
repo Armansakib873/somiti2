@@ -335,10 +335,19 @@
         <div id="view-settings" class="view-section">
           <div class="section-title">সেটিংস</div>
 
+          <!-- PWA Install Button (Hidden by default) -->
+          <div id="pwa-install-container" style="display: none; margin-bottom: 20px;">
+            <button id="pwa-install-btn" class="btn-submit" style="background: var(--blue); margin-top: 5px;">
+              <i class="fas fa-download" style="margin-right: 6px;"></i> অ্যাপ হিসেবে ইনস্টল করুন (Install App)
+            </button>
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 8px;">আপনার মোবাইলে এই ওয়েবসাইটটি অ্যাপ হিসেবে রাখতে ক্লিক করুন</p>
+          </div>
+
           <div class="settings-group collapsed">
             <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
               <div class="sg-header-content"><i class="fas fa-sliders"></i> জমার নিয়ম ও সেটিংস</div>
               <i class="fas fa-chevron-down"></i>
+
             </div>
             <div class="sg-body">
               <div class="form-group">
