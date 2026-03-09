@@ -3230,12 +3230,7 @@ let touchStartTime = 0;
 let isSwipeDownClose = false;
 let isRefreshing = false;
 let activeModalContent = null;
-let isPageSwiping = false;
-let currentTabView = null;
-let targetTabView = null;
-let swipeDirection = 0; // 1 for right (prev), -1 for left (next)
 const SWIPE_THRESHOLD = 80;
-const PAGE_SWIPE_THRESHOLD = 100; // Distance needed to commit page change
 const SWIPE_DOWN_CLOSE_THRESHOLD = 200;
 const SWIPE_DOWN_REFRESH_THRESHOLD = 80;
 
@@ -3364,7 +3359,7 @@ function handleTouchStart(e) {
   activeModalContent = activeModal ? activeModal.querySelector('.modal-content') : null;
 }
 
-// Handle touch move - for swipe down to close modal and page swiping
+// Handle touch move - for swipe down to close modal
 function handleTouchMove(e) {
   if (touchStartY === -1) return;
   
@@ -3373,75 +3368,30 @@ function handleTouchMove(e) {
   const deltaY = currentY - touchStartY;
   const deltaX = currentX - touchStartX;
   
-  // Modal Swipe Down
   if (activeModalContent) {
+    // Only trigger swipe down if we are at the top of the modal content scroll
     if (deltaY > 0 && Math.abs(deltaX) < 60 && activeModalContent.scrollTop <= 0) {
       if (e.cancelable) e.preventDefault();
+      
+      // Disable transitions for immediate response during drag
       activeModalContent.style.transition = 'none';
+      
+      // Use a slight resistance
       const transformValue = deltaY * 0.75;
       activeModalContent.style.transform = `translateY(${transformValue}px)`;
+      
+      // Fade out slightly
       const opacityValue = 1 - (transformValue / (window.innerHeight * 0.6));
       activeModalContent.style.opacity = Math.max(0.5, opacityValue);
+      
       isSwipeDownClose = true;
       return;
     }
   }
   
-  // Page Horizontal Swiping
-  if (!activeModalContent && !isRefreshing && Math.abs(deltaX) > 15 && Math.abs(deltaX) > Math.abs(deltaY)) {
-    const currentTab = getCurrentTab();
-    const currentIndex = tabOrder.indexOf(currentTab);
-    
-    // Determine target tab
-    let tTabId = null;
-    if (deltaX > 0 && currentIndex > 0) {
-      tTabId = tabOrder[currentIndex - 1];
-      swipeDirection = 1;
-    } else if (deltaX < 0 && currentIndex < tabOrder.length - 1) {
-      tTabId = tabOrder[currentIndex + 1];
-      swipeDirection = -1;
-    }
-    
-    if (tTabId) {
-      if (!isPageSwiping) {
-        currentTabView = document.getElementById(`view-${currentTab}`);
-        targetTabView = document.getElementById(`view-${tTabId}`);
-        if (currentTabView && targetTabView) {
-          isPageSwiping = true;
-          // Prepare target view
-          targetTabView.style.display = 'block';
-          targetTabView.style.position = 'absolute';
-          targetTabView.style.top = '20px'; // Match main padding
-          targetTabView.style.left = '16px'; // Match main padding
-          targetTabView.style.width = 'calc(100% - 32px)';
-          targetTabView.style.opacity = '0';
-          targetTabView.style.zIndex = '1';
-          currentTabView.style.zIndex = '2';
-        }
-      }
-      
-      if (isPageSwiping && currentTabView && targetTabView) {
-        if (e.cancelable) e.preventDefault();
-        const moveX = deltaX;
-        const progress = Math.abs(moveX) / window.innerWidth;
-        
-        currentTabView.style.transition = 'none';
-        targetTabView.style.transition = 'none';
-        
-        currentTabView.style.transform = `translateX(${moveX}px)`;
-        currentTabView.style.opacity = 1 - (progress * 0.5);
-        
-        const targetOffset = swipeDirection === 1 ? -window.innerWidth : window.innerWidth;
-        targetTabView.style.transform = `translateX(${targetOffset + moveX}px)`;
-        targetTabView.style.opacity = progress + 0.5;
-        return;
-      }
-    }
-  }
-  
-  // Pull to refresh
+  // Pull to refresh on dashboard - only when at top of page
   const currentTab = getCurrentTab();
-  if (currentTab === 'dashboard' && deltaY > SWIPE_DOWN_REFRESH_THRESHOLD && touchStartY < 80 && !activeModalContent && !isPageSwiping) {
+  if (currentTab === 'dashboard' && deltaY > SWIPE_DOWN_REFRESH_THRESHOLD && touchStartY < 80 && !activeModalContent) {
     if (!isRefreshing && deltaY > SWIPE_DOWN_REFRESH_THRESHOLD) {
       if (e.cancelable) e.preventDefault();
       isRefreshing = true;
@@ -3461,24 +3411,32 @@ function handleTouchEnd(e) {
   const deltaY = touchEndY - touchStartY;
   const deltaTime = new Date().getTime() - touchStartTime;
   
-  // Modal Close Snap/Finish
   if (isSwipeDownClose && activeModalContent) {
+    // Re-enable transition for snapping or closing
     activeModalContent.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease';
-    const threshold = 200;
+    
+    const threshold = 200; // Increased threshold to prevent accidental closing
+    
+    // Save reference to avoids closure issues with global activeModalContent
     const modalToAnimate = activeModalContent;
+    
     if (deltaY > threshold) {
+      // Exit animation
       modalToAnimate.style.transform = 'translateY(100%)';
       modalToAnimate.style.opacity = '0';
       setTimeout(() => {
         closeAllModals();
+        // Reset styles after transition completes
         modalToAnimate.style.transform = '';
         modalToAnimate.style.opacity = '';
         modalToAnimate.style.transition = '';
       }, 300);
     } else {
+      // Snap back animation
       modalToAnimate.style.transform = 'translateY(0)';
       modalToAnimate.style.opacity = '1';
       setTimeout(() => {
+        // Clean up inline styles once back to normal
         modalToAnimate.style.transform = '';
         modalToAnimate.style.opacity = '';
         modalToAnimate.style.transition = '';
@@ -3491,91 +3449,22 @@ function handleTouchEnd(e) {
     return;
   }
   
-  // Page Swipe Snap/Finish
-  if (isPageSwiping && currentTabView && targetTabView) {
-    const transitionStyle = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease';
-    currentTabView.style.transition = transitionStyle;
-    targetTabView.style.transition = transitionStyle;
-    
-    const threshold = window.innerWidth * 0.25; // 25% of width to commit
-    
-    if (Math.abs(deltaX) > threshold || (Math.abs(deltaX) > 50 && deltaTime < 300)) {
-        // Commit change
-        const finalOffset = swipeDirection === 1 ? window.innerWidth : -window.innerWidth;
-        currentTabView.style.transform = `translateX(${finalOffset}px)`;
-        currentTabView.style.opacity = '0';
-        targetTabView.style.transform = 'translateX(0)';
-        targetTabView.style.opacity = '1';
-        
-        const newTabId = targetTabView.id.replace('view-', '');
-        
-        // Finalize
-        setTimeout(() => {
-            currentTabView.classList.remove('active');
-            currentTabView.style.transform = '';
-            currentTabView.style.opacity = '';
-            currentTabView.style.transition = '';
-            currentTabView.style.position = '';
-            
-            targetTabView.style.transform = '';
-            targetTabView.style.opacity = '';
-            targetTabView.style.transition = '';
-            targetTabView.style.position = '';
-            targetTabView.style.width = '';
-            targetTabView.style.top = '';
-            targetTabView.style.left = '';
-            
-            // Update UI elements
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const navItem = document.querySelector(`.nav-item[data-tab="${newTabId}"]`);
-            if (navItem) navItem.classList.add('active');
-            
-            const fab = document.getElementById('fab-btn');
-            if (fab) {
-              (newTabId === 'settings' || newTabId === 'member-detail') ? fab.classList.add('hidden') : fab.classList.remove('hidden');
-            }
-            if (newTabId === 'settings') loadSettings();
-            
-            history.pushState({ tab: newTabId }, '', '#' + newTabId);
-        }, 350);
-    } else {
-        // Snap back
-        currentTabView.style.transform = 'translateX(0)';
-        currentTabView.style.opacity = '1';
-        const targetOffset = swipeDirection === 1 ? -window.innerWidth : window.innerWidth;
-        targetTabView.style.transform = `translateX(${targetOffset}px)`;
-        targetTabView.style.opacity = '0';
-        
-        setTimeout(() => {
-            targetTabView.classList.remove('active');
-            targetTabView.style.display = 'none';
-            
-            currentTabView.style.transform = '';
-            currentTabView.style.opacity = '';
-            currentTabView.style.transition = '';
-            
-            targetTabView.style.transform = '';
-            targetTabView.style.opacity = '';
-            targetTabView.style.transition = '';
-            targetTabView.style.position = '';
-            targetTabView.style.width = '';
-            targetTabView.style.top = '';
-            targetTabView.style.left = '';
-        }, 350);
-    }
-    
-    isPageSwiping = false;
-    currentTabView = null;
-    targetTabView = null;
+  if (deltaTime < 300 && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
     touchStartX = -1;
     touchStartY = -1;
     return;
   }
   
-  if (deltaTime < 300 && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
-    touchStartX = -1;
-    touchStartY = -1;
-    return;
+  // Page swipe navigation
+  if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaY) < 100 && deltaTime < 500 && !activeModalContent) {
+    const currentTab = getCurrentTab();
+    const currentIndex = tabOrder.indexOf(currentTab);
+    
+    if (deltaX > 0 && currentIndex > 0) {
+      animateTabChange(tabOrder[currentIndex - 1]);
+    } else if (deltaX < 0 && currentIndex < tabOrder.length - 1) {
+      animateTabChange(tabOrder[currentIndex + 1]);
+    }
   }
   
   touchStartX = -1;
