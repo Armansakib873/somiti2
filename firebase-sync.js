@@ -7,13 +7,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDEZvUtSTgRkrPDIRAmMUTNgVg85eNx7H8",
-  authDomain: "somiti-160cf.firebaseapp.com",
-  databaseURL: "https://somiti-160cf-default-rtdb.firebaseio.com",
-  projectId: "somiti-160cf",
-  storageBucket: "somiti-160cf.firebasestorage.app",
-  messagingSenderId: "957360419149",
-  appId: "1:957360419149:web:212084e98b083da26b4704"
+  apiKey: "AIzaSyACRVW8V_MWB3cU9aYydsDjoJMUCmO8T_M",
+  authDomain: "somiti2.firebaseapp.com",
+  projectId: "somiti2",
+  storageBucket: "somiti2.firebasestorage.app",
+  messagingSenderId: "289064840559",
+  appId: "1:289064840559:web:e84b3928e1086279cf4c9a"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
