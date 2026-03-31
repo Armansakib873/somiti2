@@ -9,6 +9,7 @@ import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/fir
 const firebaseConfig = {
   apiKey: "AIzaSyACRVW8V_MWB3cU9aYydsDjoJMUCmO8T_M",
   authDomain: "somiti2.firebaseapp.com",
+  databaseURL: "https://somiti2-default-rtdb.firebaseio.com",
   projectId: "somiti2",
   storageBucket: "somiti2.firebasestorage.app",
   messagingSenderId: "289064840559",
