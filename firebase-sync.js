@@ -83,7 +83,15 @@ window.firebaseLoadData = function(onLoaded) {
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(remoteData));
         // Update appState and refresh UI (defined in app.js)
         if (typeof appState !== "undefined") {
-          appState = remoteData;
+          if (typeof _applyDefaults === "function") {
+            appState = _applyDefaults(remoteData);
+          } else {
+            appState = remoteData;
+            if (!appState.members) appState.members = [];
+            if (!appState.transactions) appState.transactions = [];
+            if (!appState.depositHistory) appState.depositHistory = [];
+            if (!appState.clearanceLogs) appState.clearanceLogs = [];
+          }
           if (typeof refreshUI === "function") refreshUI();
         }
       }

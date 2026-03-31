@@ -1,4 +1,4 @@
-﻿
+
 const APP_STORAGE_KEY = "somobayFundDataV4";
 
 const defaultConfig = {
@@ -32,12 +32,15 @@ let editingTxId = null;
 let editingTxType = null;
 
 function _applyDefaults(data) {
+  if (!data) data = {};
   if (!data.config) data.config = { ...defaultConfig };
   if (data.config.annualBooster === undefined) data.config.annualBooster = 5000;
   if (data.config.penaltyPerDay === undefined) data.config.penaltyPerDay = 0.1;
   if (data.config.maxPenaltyLimit === undefined) data.config.maxPenaltyLimit = 50;
   if (!data.depositHistory) data.depositHistory = [];
   if (!data.clearanceLogs) data.clearanceLogs = [];
+  if (!data.members) data.members = [];
+  if (!data.transactions) data.transactions = [];
   return data;
 }
 
