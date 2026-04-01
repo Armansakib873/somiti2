@@ -20,6 +20,14 @@ const defaultData = {
 // 🟢 Move these variables to the top so they are initialized before use
 let appState = null;
 let financialMetrics = {};
+
+function getBoosterAmountForYear(year) {
+    if (appState && appState.config && appState.config.yearlyBoosters && appState.config.yearlyBoosters[year] !== undefined) {
+        return parseFloat(appState.config.yearlyBoosters[year]);
+    }
+    return (appState && appState.config && appState.config.annualBooster !== undefined) ? appState.config.annualBooster : 5000;
+}
+
 let currentFilterMode = "all"; // "month", "year", "all"
 let currentFilterYear = new Date().getFullYear();
 let currentFilterMonth = new Date().getMonth();
@@ -460,8 +468,8 @@ function calculateFinances() {
   getFilteredDeposits().forEach(d => { fDeposits += d.amount; });
 
   // Due Calculation based on Global Start Date & Opening Date
-  const monthlyInstallment = appState.config?.monthlyInstallment || 1000;
-  const annualBooster = appState.config?.annualBooster || 5000;
+  const monthlyInstallment = appState.config?.monthlyInstallment !== undefined ? appState.config.monthlyInstallment : 1000;
+  const annualBooster = appState.config?.annualBooster !== undefined ? appState.config.annualBooster : 5000;
 
   const processedMembers = appState.members.map(m => {
       let joinDate = new Date(m.openingDate || "2025-01-01");
@@ -473,9 +481,26 @@ function calculateFinances() {
       let monthsPassed = (currentYear - effectiveDate.getFullYear()) * 12 + (currentMonth - effectiveDate.getMonth()) + 1;
       if (monthsPassed < 0) monthsPassed = 0;
       
-      // Running year এ পা দিলেই booster ডিউ হয়ে যাবে
-      let yearsPassed = Math.ceil(monthsPassed / 12);
-      let expectedTotal = (monthsPassed * monthlyInstallment) + (yearsPassed * annualBooster);
+      let expectedTotalBooster = 0;
+      let startYearVal = effectiveDate.getFullYear();
+      let startMonthVal = effectiveDate.getMonth();
+      for (let y = startYearVal; y <= currentYear; y++) {
+          let mntInY = 0;
+          if (y === startYearVal && y === currentYear) {
+              mntInY = currentMonth - startMonthVal + 1;
+          } else if (y === startYearVal) {
+              mntInY = 12 - startMonthVal;
+          } else if (y === currentYear) {
+              mntInY = currentMonth + 1;
+          } else {
+              mntInY = 12;
+          }
+          if (mntInY > 0) {
+              expectedTotalBooster += getBoosterAmountForYear(y);
+          }
+      }
+      
+      let expectedTotal = (monthsPassed * monthlyInstallment) + expectedTotalBooster;
       let dueAmount = expectedTotal - m.deposited;
 
       return {
@@ -966,15 +991,47 @@ function renderSummary() {
 
 function renderEmptyState(icon, msg) { return `<div class="empty-state"><i class="${icon}"></i><p>${msg}</p></div>`; }
 
+function renderYearlyBoostersSettings() {
+    const container = document.getElementById("yearly-boosters-container");
+    if (!container) return;
+    const boosters = appState.config?.yearlyBoosters || {};
+    let html = "";
+    Object.keys(boosters).sort().forEach(year => {
+        html += `
+        <div class="yb-row" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
+            <input type="number" class="yb-year" placeholder="বছর (যেমন: 2024)" value="${year}" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border);" />
+            <input type="number" class="yb-amount" placeholder="বুস্টার (৳)" value="${boosters[year]}" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border);" />
+            <button type="button" class="btn-action btn-danger-action" style="margin: 0; padding: 8px 12px; width: auto;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+        </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function addYearlyBoosterField() {
+    const container = document.getElementById("yearly-boosters-container");
+    if (!container) return;
+    const div = document.createElement("div");
+    div.className = "yb-row";
+    div.style.cssText = "display: flex; gap: 10px; margin-bottom: 8px; align-items: center;";
+    div.innerHTML = `
+        <input type="number" class="yb-year" placeholder="বছর (যেমন: 2024)" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border);" />
+        <input type="number" class="yb-amount" placeholder="বুস্টার (৳)" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border);" />
+        <button type="button" class="btn-action btn-danger-action" style="margin: 0; padding: 8px 12px; width: auto;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    `;
+    container.appendChild(div);
+}
+
 function loadSettings() {
-  document.getElementById("setting-monthly-installment").value = appState.config?.monthlyInstallment || 1000;
-  document.getElementById("setting-annual-booster").value = appState.config?.annualBooster || 5000;
+  document.getElementById("setting-monthly-installment").value = appState.config?.monthlyInstallment !== undefined ? appState.config.monthlyInstallment : 1000;
+  document.getElementById("setting-annual-booster").value = appState.config?.annualBooster !== undefined ? appState.config.annualBooster : 5000;
+  renderYearlyBoostersSettings();
   document.getElementById("setting-fund-name").value = appState.config?.fundName || "সমবায় ফান্ড প্রো";
   document.getElementById("setting-fund-start-date").value = appState.config?.fundStartDate || "2025-01-01";
   
   // New Profit Share & Penalty Settings
-  document.getElementById("setting-penalty-rate").value = appState.config?.penaltyPerDay || 0.1;
-  document.getElementById("setting-max-penalty").value = appState.config?.maxPenaltyLimit || 50;
+  document.getElementById("setting-penalty-rate").value = appState.config?.penaltyPerDay !== undefined ? appState.config.penaltyPerDay : 0.1;
+  document.getElementById("setting-max-penalty").value = appState.config?.maxPenaltyLimit !== undefined ? appState.config.maxPenaltyLimit : 50;
   
   // Audit #4: only show active members in the removal select
   const activeMembers = appState.members.filter(m => !m.archived);
@@ -992,6 +1049,16 @@ function saveSettings() {
   
   if(!isNaN(m) && m >= 0) appState.config.monthlyInstallment = m;
   if(!isNaN(b) && b >= 0) appState.config.annualBooster = b;
+  
+  appState.config.yearlyBoosters = {};
+  document.querySelectorAll(".yb-row").forEach(row => {
+      const year = row.querySelector(".yb-year").value.trim();
+      const amount = parseFloat(row.querySelector(".yb-amount").value);
+      if (year && !isNaN(amount) && amount >= 0) {
+          appState.config.yearlyBoosters[year] = amount;
+      }
+  });
+
   if(f) appState.config.fundName = f;
   if(sDate) appState.config.fundStartDate = sDate;
   
@@ -1017,13 +1084,35 @@ function switchTab(tabId, el, fromHistory = false) {
   const main = document.getElementById("main-content"); if (main) main.scrollTop = 0;
   const fab = document.getElementById("fab-btn");
   if (fab) { (tabId === "settings" || tabId === "member-detail") ? fab.classList.add("hidden") : fab.classList.remove("hidden"); }
-  if (tabId === "settings") loadSettings();
+  if (tabId === "settings") {
+      loadSettings();
+      // Ensure we're at settings home
+      document.querySelectorAll('.sub-settings-view').forEach(v => v.classList.remove('active'));
+  }
 
   // History management
   if (!fromHistory) {
       history.pushState({ tab: tabId }, '', '#' + tabId);
   }
 }
+
+function openSubSettings(id) {
+    const subView = document.getElementById(id);
+    if (!subView) return;
+    
+    // Show target sub-view
+    subView.classList.add('active');
+    
+    // Add history entry for sub-settings
+    const currentTab = getCurrentTab();
+    history.pushState({ tab: currentTab, subSettingsId: id }, '', '#' + currentTab + '/' + id);
+}
+
+function closeSubSettings() {
+    history.back();
+}
+
+
 
 function toggleFilterMode(direction = 'next') {
     const label = document.getElementById('month-label');
@@ -1935,8 +2024,8 @@ function exportActiveMemberReport(memberId) {
     const individualEquity = member.deposited + profitShare;
 
     // Year-wise Due Summary Calculation (Mirroring openDueSummary logic)
-    const monthlyInstallment = appState.config?.monthlyInstallment || 1000;
-    const annualBooster = appState.config?.annualBooster || 5000;
+    const monthlyInstallment = appState.config?.monthlyInstallment !== undefined ? appState.config.monthlyInstallment : 1000;
+    const annualBooster = appState.config?.annualBooster !== undefined ? appState.config.annualBooster : 5000;
     const globalStart = new Date(appState.config?.fundStartDate || "2025-01-01");
     let joinDate = new Date(member.openingDate || "2025-01-01");
     if(isNaN(joinDate)) joinDate = new Date("2025-01-01");
@@ -1978,14 +2067,16 @@ function exportActiveMemberReport(memberId) {
                 const target = getDepositTarget(d);
                 return target.year === year && (d.desc && d.desc.toLowerCase().includes("boost"));
             }).reduce((sum, d) => sum + d.amount, 0);
+            
+            let curAnnualBooster = getBoosterAmountForYear(year);
 
             yearSummaries.push({
                 year: year,
                 months: months,
-                booster: annualBooster > 0 ? {
-                    amount: annualBooster,
+                booster: curAnnualBooster > 0 ? {
+                    amount: curAnnualBooster,
                     paid: boosterPaidTotal,
-                    isPaid: boosterPaidTotal >= annualBooster
+                    isPaid: boosterPaidTotal >= curAnnualBooster
                 } : null
             });
         }
@@ -2528,8 +2619,8 @@ function renderDepositSummaryTable() {
     }
   }
 
-  const monthlyInstallment = appState.config?.monthlyInstallment || 1000;
-  const annualBooster = appState.config?.annualBooster || 5000;
+  const monthlyInstallment = appState.config?.monthlyInstallment !== undefined ? appState.config.monthlyInstallment : 1000;
+  const annualBooster = appState.config?.annualBooster !== undefined ? appState.config.annualBooster : 5000;
   // সেটিংসে দেওয়া "সমিতি শুরুর তারিখ" অথবা ডিফল্ট একটি তারিখ
   const globalStartDateStr = appState.config?.fundStartDate || "2025-01-01";
   const globalStartDate = new Date(globalStartDateStr);
@@ -2594,7 +2685,7 @@ function renderDepositSummaryTable() {
     // Running Year এর জন্য Booster/Advance এবং Due এর হিসাব
     let expectedRegular = monthsPassedInYear * monthlyInstallment;
     // যদি ওই বছরে অন্তত ১ মাসও পার হয়ে থাকে, তাহলে পুরো বছরের বুস্টার ডিউ হিসেবে ধরা হবে
-    let boosterForYear = monthsPassedInYear > 0 ? annualBooster : 0; 
+    let boosterForYear = monthsPassedInYear > 0 ? getBoosterAmountForYear(summaryTableYear) : 0; 
     let expectedTotal = expectedRegular + boosterForYear;
     
     let due = Math.max(0, expectedTotal - yearlyTotal);
@@ -3057,8 +3148,8 @@ function openDueSummary(memberId) {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
-    const monthlyInstallment = appState.config?.monthlyInstallment || 1000;
-    const annualBooster = appState.config?.annualBooster || 5000;
+    const monthlyInstallment = appState.config?.monthlyInstallment !== undefined ? appState.config.monthlyInstallment : 1000;
+    const annualBooster = appState.config?.annualBooster !== undefined ? appState.config.annualBooster : 5000;
     
     let joinDate = new Date(member.openingDate || "2025-01-01");
     if (isNaN(joinDate)) joinDate = new Date("2025-01-01");
@@ -3110,7 +3201,8 @@ function openDueSummary(memberId) {
         
         let boosterInfo = "";
         let boosterFullyPaid = false;
-        if (monthsFoundInYear > 0 && annualBooster > 0) {
+        let curAnnualBooster = getBoosterAmountForYear(year);
+        if (monthsFoundInYear > 0 && curAnnualBooster > 0) {
             let yearlyTotal = 0;
             let totalRegularPaid = 0;
             for (let mo = 0; mo < 12; mo++) {
@@ -3120,7 +3212,7 @@ function openDueSummary(memberId) {
             }
             const boosterPaidTotal = yearlyTotal - totalRegularPaid;
 
-            if (boosterPaidTotal >= annualBooster) {
+            if (boosterPaidTotal >= curAnnualBooster) {
                 boosterFullyPaid = true;
                 boosterInfo = `
                 <div class="due-booster-card">
@@ -3128,7 +3220,7 @@ function openDueSummary(memberId) {
                     <span class="db-status paid">\u2705 পরিশোধিত</span>
                 </div>`;
             } else {
-                const remB = annualBooster - boosterPaidTotal;
+                const remB = curAnnualBooster - boosterPaidTotal;
                 totalAmountDueParsed += remB;
                 totalUnpaidBooster++;
                 boosterFullyPaid = false;
@@ -3170,7 +3262,7 @@ function openDueSummary(memberId) {
                 <span class="dbr-label">বকেয়া মাসের সংখ্যা</span>
                 <span class="dbr-value ${totalUnpaidMonths > 0 ? 'due' : 'ok'}">${toBengaliNum(totalUnpaidMonths)} মাস</span>
             </div>
-            ${annualBooster > 0 ? `
+            ${(annualBooster > 0 || totalUnpaidBooster > 0) ? `
             <div class="due-breakdown-row">
                 <span class="dbr-label">বকেয়া বুস্টার</span>
                 <span class="dbr-value ${totalUnpaidBooster > 0 ? 'due' : 'ok'}">${totalUnpaidBooster > 0 ? toBengaliNum(totalUnpaidBooster) + ' বছর' : '\u2705 সম্পূর্ণ'}</span>
@@ -3284,6 +3376,13 @@ function handleBackButton() {
   const activeModal = document.querySelector('.modal-overlay.active');
   if (activeModal) {
     closeAllModals(true); // Don't trigger history.back() when closing from back button
+    return;
+  }
+  
+  // Check for settings sub-view
+  const activeSubView = document.querySelector('.sub-settings-view.active');
+  if (activeSubView) {
+    activeSubView.classList.remove('active');
     return;
   }
   

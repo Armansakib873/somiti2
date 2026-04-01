@@ -332,54 +332,124 @@
 
 
         <!-- ===== SETTINGS VIEW ===== -->
-        <div id="view-settings" class="view-section">
-          <div class="section-title">সেটিংস</div>
+        <div id="view-settings" class="view-section" style="position: relative;">
+          <div id="settings-main-menu">
+            <div class="section-title">সেটিংস</div>
 
-          <!-- PWA Install Button (Hidden by default) -->
-          <div id="pwa-install-container" style="display: none; margin-bottom: 20px;">
-            <button id="pwa-install-btn" class="btn-submit" style="background: var(--blue); margin-top: 5px;">
-              <i class="fas fa-download" style="margin-right: 6px;"></i> অ্যাপ হিসেবে ইনস্টল করুন (Install App)
-            </button>
-            <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 8px;">আপনার মোবাইলে এই ওয়েবসাইটটি অ্যাপ হিসেবে রাখতে ক্লিক করুন</p>
+            <!-- PWA Install Button (Hidden by default) -->
+            <div id="pwa-install-container" style="display: none; margin-bottom: 20px;">
+              <button id="pwa-install-btn" class="btn-submit" style="background: var(--blue); margin-top: 5px;">
+                <i class="fas fa-download" style="margin-right: 6px;"></i> অ্যাপ হিসেবে ইনস্টল করুন (Install App)
+              </button>
+              <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 8px;">আপনার মোবাইলে এই ওয়েবসাইটটি অ্যাপ হিসেবে রাখতে ক্লিক করুন</p>
+            </div>
+
+            <div class="settings-list">
+              <div class="setting-item" onclick="openSubSettings('sub-settings-rules')">
+                <div class="setting-icon qb-green"><i class="fas fa-sliders"></i></div>
+                <div class="setting-info">
+                  <span class="setting-title">জমার নিয়ম ও সেটিংস</span>
+                  <span class="setting-desc">মাসিক কিস্তি, বুস্টার ও সমিতির নাম</span>
+                </div>
+                <div class="setting-arrow"><i class="fas fa-chevron-right"></i></div>
+              </div>
+
+              <div class="setting-item" onclick="openSubSettings('sub-settings-policy')">
+                <div class="setting-icon qb-orange"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div class="setting-info">
+                  <span class="setting-title">লভ্যাংশ ও জরিমানা নীতিমালা</span>
+                  <span class="setting-desc">বিলম্ব ফি ও পেনাল্টি ক্যালকুলেশন</span>
+                </div>
+                <div class="setting-arrow"><i class="fas fa-chevron-right"></i></div>
+              </div>
+
+              <div class="setting-item" onclick="openSubSettings('sub-settings-add-member')">
+                <div class="setting-icon qb-blue"><i class="fas fa-user-plus"></i></div>
+                <div class="setting-info">
+                  <span class="setting-title">সদস্য যুক্ত করুন</span>
+                  <span class="setting-desc">নতুন সদস্যের প্রোফাইল তৈরি করুন</span>
+                </div>
+                <div class="setting-arrow"><i class="fas fa-chevron-right"></i></div>
+              </div>
+
+              <div class="setting-item" onclick="openSubSettings('sub-settings-data')">
+                <div class="setting-icon qb-purple"><i class="fas fa-database"></i></div>
+                <div class="setting-info">
+                  <span class="setting-title">ডেটা ব্যবস্থাপনা</span>
+                  <span class="setting-desc">ব্যাকআপ, ইম্পোর্ট ও ডেটা মুছুন</span>
+                </div>
+                <div class="setting-arrow"><i class="fas fa-chevron-right"></i></div>
+              </div>
+
+              <div class="setting-item" onclick="openSubSettings('sub-settings-remove-member')">
+                <div class="setting-icon qb-red"><i class="fas fa-user-minus"></i></div>
+                <div class="setting-info">
+                  <span class="setting-title">সদস্য অপসারণ</span>
+                  <span class="setting-desc">সদস্য বিদায় ও হিসাব ক্লোজ করা</span>
+                </div>
+                <div class="setting-arrow"><i class="fas fa-chevron-right"></i></div>
+              </div>
+
+              <div class="setting-item" onclick="switchTab('clearance-log', document.querySelector('[data-tab=summary]'))">
+                <div class="setting-icon qb-amber"><i class="fas fa-history"></i></div>
+                <div class="setting-info">
+                  <span class="setting-title">ক্লোজড মেম্বার লগ</span>
+                  <span class="setting-desc">বিদায়ী সদস্যদের হিসাবের ইতিহাস</span>
+                </div>
+                <div class="setting-arrow"><i class="fas fa-chevron-right"></i></div>
+              </div>
+            </div>
+
+            <div class="app-version">
+              <p>সমবায় ফান্ড প্রো v2.6</p>
+              <p class="version-sub">সর্বশেষ আপডেট: আধুনিক সমবায় নীতিমালা</p>
+            </div>
           </div>
 
-          <div class="settings-group collapsed">
-            <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
-              <div class="sg-header-content"><i class="fas fa-sliders"></i> জমার নিয়ম ও সেটিংস</div>
-              <i class="fas fa-chevron-down"></i>
-
+          <!-- Sub Settings View: Rules -->
+          <div id="sub-settings-rules" class="sub-settings-view">
+            <div class="sub-settings-header">
+              <button class="sub-settings-back" onclick="closeSubSettings()"><i class="fas fa-arrow-left"></i></button>
+              <span class="sub-settings-title">জমার নিয়ম ও সেটিংস</span>
             </div>
-            <div class="sg-body">
+            <div class="sub-settings-content">
               <div class="form-group">
                 <label>মাসিক ফিক্সড জমা (৳)</label>
                 <input type="number" id="setting-monthly-installment" min="0" />
               </div>
               <div class="form-group">
-                <label>বার্ষিক বুস্টার জমা (Booster) (৳)</label>
+                <label>বার্ষিক ডিফল্ট বুস্টার (Booster) (৳)</label>
                 <input type="number" id="setting-annual-booster" min="0" />
+                <small style="color:var(--text-muted); font-size:0.75rem;">এটি ডিফল্ট বুস্টার হিসেবে কাজ করবে।</small>
+              </div>
+              <div class="form-group" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                <label style="color: var(--primary-dark);"><i class="fas fa-calendar-check" style="margin-right:6px;"></i> বছরভিত্তিক বুস্টার সেট করুন</label>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">বিশেষ কোনো বছরের জন্য আলাদা বুস্টার পরিমাণ থাকলে নিচে সেট করুন। না থাকলে ডিফল্টটিই প্রযোজ্য হবে।</p>
+                <div id="yearly-boosters-container">
+                  <!-- JS renders -->
+                </div>
+                <button type="button" onclick="addYearlyBoosterField()" style="margin-top: 8px; width: 100%; padding: 8px; background: #fff; color: var(--primary); border: 1px dashed var(--primary); border-radius: 6px; cursor: pointer; font-size: 0.85rem;"><i class="fas fa-plus"></i> নতুন বছর যোগ করুন</button>
               </div>
               <div class="form-group">
                 <label>সমিতির নাম</label>
                 <input type="text" id="setting-fund-name" placeholder="সমবায় ফান্ড প্রো" />
               </div>
-              
               <div class="form-group">
-  <label>সমিতি শুরুর তারিখ</label>
-  <input type="date" id="setting-fund-start-date" />
-  <span id="setting-fund-start-date-bn" class="bengali-date-display"></span>
-</div>
-
-
-              <button class="btn-submit" onclick="saveSettings()"><i class="fas fa-save"></i> সেটিংস সেভ করুন</button>
+                <label>সমিতি শুরুর তারিখ</label>
+                <input type="date" id="setting-fund-start-date" />
+                <span id="setting-fund-start-date-bn" class="bengali-date-display"></span>
+              </div>
+              <button class="btn-submit" onclick="saveSettings(); closeSubSettings();"><i class="fas fa-save"></i> সেটিংস সেভ করুন</button>
             </div>
           </div>
 
-          <div class="settings-group collapsed">
-            <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
-              <div class="sg-header-content"><i class="fas fa-hand-holding-dollar"></i> লাভ বণ্টন ও জরিমানা নীতিমালা</div>
-              <i class="fas fa-chevron-down"></i>
+          <!-- Sub Settings View: Policy -->
+          <div id="sub-settings-policy" class="sub-settings-view">
+            <div class="sub-settings-header">
+              <button class="sub-settings-back" onclick="closeSubSettings()"><i class="fas fa-arrow-left"></i></button>
+              <span class="sub-settings-title">লভ্যাংশ ও জরিমানা নীতিমালা</span>
             </div>
-            <div class="sg-body">
+            <div class="sub-settings-content">
               <div style="font-size:0.85rem; color:var(--primary); background:#eff6ff; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid #dbeafe;">
                 <i class="fas fa-info-circle"></i> <strong>বিলম্ব নীতি:</strong> মাসের যেকোনো দিন জমা দিলে তা বিলম্ব হিসেবে গণ্য হবে না। পরবর্তী মাসের ১ তারিখ থেকে বিলম্ব দিন গণনা শুরু হবে।
               </div>
@@ -393,17 +463,17 @@
                 <input type="number" id="setting-max-penalty" min="0" max="100" placeholder="50" />
                 <small style="color:var(--text-muted); font-size:0.75rem;">একজন সদস্যের লভ্যাংশ সর্বোচ্চ কত % কাটা হতে পারে</small>
               </div>
-              <button class="btn-submit" onclick="saveSettings()"><i class="fas fa-save"></i> নীতিমালা সেভ করুন</button>
+              <button class="btn-submit" onclick="saveSettings(); closeSubSettings();"><i class="fas fa-save"></i> নীতিমালা সেভ করুন</button>
             </div>
           </div>
 
-          <div class="settings-group collapsed">
-            <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
-              <div class="sg-header-content"><i class="fas fa-user-plus"></i> সদস্য যুক্ত করুন</div>
-              <i class="fas fa-chevron-down"></i>
+          <!-- Sub Settings View: Add Member -->
+          <div id="sub-settings-add-member" class="sub-settings-view">
+            <div class="sub-settings-header">
+              <button class="sub-settings-back" onclick="closeSubSettings()"><i class="fas fa-arrow-left"></i></button>
+              <span class="sub-settings-title">নতুন সদস্য যুক্ত করুন</span>
             </div>
-            <div class="sg-body">
-              <!-- Dynamic Comment -->
+            <div class="sub-settings-content" style="padding-bottom: 200px;">
               <div id="new-member-dynamic-comment" class="dynamic-comment"></div>
               <div class="form-group">
                 <label><i class="fas fa-language"></i> বাংলা নাম</label>
@@ -413,7 +483,6 @@
                 <label><i class="fas fa-font"></i> ইংরেজি নাম (Optional)</label>
                 <input type="text" id="new-member-name-en" placeholder="e.g. Karim Uddin" />
               </div>
-
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <div class="form-group">
                   <label><i class="fas fa-phone-alt"></i> ফোন নম্বর</label>
@@ -424,7 +493,6 @@
                   <input type="email" id="new-member-email" placeholder="name@gmail.com" />
                 </div>
               </div>
-
               <div class="form-group">
                 <label><i class="fas fa-calendar-alt"></i> যোগদানের তারিখ</label>
                 <input type="date" id="new-member-date" />
@@ -434,16 +502,17 @@
                 <label><i class="fas fa-money-bill-wave"></i> প্রারম্ভিক জমা (৳)</label>
                 <input type="number" id="new-member-deposit" placeholder="০" value="0" min="0" />
               </div>
-              <button class="btn-submit" onclick="addMember()"><i class="fas fa-plus"></i> সদস্য যুক্ত করুন</button>
+              <button class="btn-submit" onclick="addMember();"><i class="fas fa-plus"></i> সদস্য যুক্ত করুন</button>
             </div>
           </div>
 
-          <div class="settings-group collapsed">
-            <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
-              <div class="sg-header-content"><i class="fas fa-database"></i> ডেটা ব্যবস্থাপনা</div>
-              <i class="fas fa-chevron-down"></i>
+          <!-- Sub Settings View: Data -->
+          <div id="sub-settings-data" class="sub-settings-view">
+            <div class="sub-settings-header">
+              <button class="sub-settings-back" onclick="closeSubSettings()"><i class="fas fa-arrow-left"></i></button>
+              <span class="sub-settings-title">ডেটা ব্যবস্থাপনা</span>
             </div>
-            <div class="sg-body">
+            <div class="sub-settings-content">
               <button class="btn-action btn-export" onclick="exportData()"><i class="fas fa-download"></i> ডেটা এক্সপোর্ট (JSON)</button>
               <button class="btn-action btn-export" onclick="exportDataCSV()" style="background: #065f46;"><i class="fas fa-file-excel"></i> ডেটা এক্সপোর্ট (Excel)</button>
               <label class="btn-action btn-import" for="import-file-input"><i class="fas fa-upload"></i> ডেটা ইম্পোর্ট</label>
@@ -452,33 +521,19 @@
             </div>
           </div>
 
-          <div class="settings-group collapsed">
-            <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
-              <div class="sg-header-content"><i class="fas fa-user-minus"></i> সদস্য অপসারণ</div>
-              <i class="fas fa-chevron-down"></i>
+          <!-- Sub Settings View: Remove Member -->
+          <div id="sub-settings-remove-member" class="sub-settings-view">
+            <div class="sub-settings-header">
+              <button class="sub-settings-back" onclick="closeSubSettings()"><i class="fas fa-arrow-left"></i></button>
+              <span class="sub-settings-title">সদস্য অপসারণ</span>
             </div>
-            <div class="sg-body">
+            <div class="sub-settings-content">
               <div class="form-group">
                 <label>সদস্য নির্বাচন</label>
                 <select id="remove-member-select"></select>
               </div>
               <button class="btn-action btn-danger-action" onclick="removeMember()"><i class="fas fa-user-minus"></i> সদস্য অপসারণ ও হিসাব ক্লোজ</button>
             </div>
-          </div>
-
-          <div class="settings-group collapsed">
-            <div class="sg-header" onclick="this.parentElement.classList.toggle('collapsed')">
-              <div class="sg-header-content"><i class="fas fa-history"></i> ক্লোজড মেম্বার লগ</div>
-              <i class="fas fa-chevron-down"></i>
-            </div>
-            <div class="sg-body">
-              <button class="btn-action btn-import" onclick="switchTab('clearance-log', document.querySelector('[data-tab=summary]'))"><i class="fas fa-file-invoice"></i> ক্লিয়ারেন্স লগ দেখুন</button>
-            </div>
-          </div>
-
-          <div class="app-version">
-            <p>সমবায় ফান্ড প্রো v2.5</p>
-            <p class="version-sub">সর্বশেষ আপডেট: আধুনিক সমবায় নীতিমালা</p>
           </div>
         </div>
 

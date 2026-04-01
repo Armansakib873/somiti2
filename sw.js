@@ -1,4 +1,4 @@
-const CACHE_NAME = 'somiti-fund-pro-v2.1';
+const CACHE_NAME = 'somiti-fund-pro-v2.6';
 const urlsToCache = [
   './',
   './index.html',
